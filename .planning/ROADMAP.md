@@ -13,10 +13,10 @@ Replace all native Medusa password auth (storefront customer `emailpass` and Adm
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Supabase Local + SSR Foundation** - Local Auth host, env boundaries, durable SSR cookies
-- [ ] **Phase 2: Storefront Supabase Identity** - Register, login, logout, verify, and password reset via Supabase
-- [ ] **Phase 3: Medusa Customer Bridge** - Link Medusa customer, Store credential, guest cart transfer
-- [ ] **Phase 4: Admin Supabase Login** - Operator Supabase login with Medusa user actor session
-- [ ] **Phase 5: Hard Cutover** - Remove Medusa password auth; invalidate old JWTs; cutover messaging
+- [x] **Phase 2: Storefront Supabase Identity** - Register, login, logout, verify, and password reset via Supabase
+- [x] **Phase 3: Medusa Customer Bridge** - Link Medusa customer, Store credential, guest cart transfer
+- [x] **Phase 4: Admin Supabase Login** - Operator Supabase login with Medusa user actor session
+- [x] **Phase 5: Hard Cutover** - Remove Medusa password auth; invalidate old JWTs; cutover messaging
 
 ## Phase Details
 
@@ -115,10 +115,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Supabase Local + SSR Foundation | 1/1 | Complete | 2026-10-08 |
-| 2. Storefront Supabase Identity | 2/2 | In Progress | - |
-| 3. Medusa Customer Bridge | 2/2 | In Progress | - |
-| 4. Admin Supabase Login | 2/2 | In Progress | - |
-| 5. Hard Cutover | 1/1 | In Progress | - |
+| 2. Storefront Supabase Identity | 2/2 | Complete | 2026-10-08 |
+| 3. Medusa Customer Bridge | 2/2 | Complete | 2026-10-08 |
+| 4. Admin Supabase Login | 2/2 | Complete | 2026-10-08 |
+| 5. Hard Cutover | 1/1 | Complete | 2026-10-08 |
 
 ## Coverage Map
 
