@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Storefront Supabase Identity
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-10-07T23:30:16.381Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-10-07T23:31:50.444Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 1 (`01-01`) executed (SSR clients, env templates, middleware, supabase init)
-state_head: ceb7ec4cd6767f385b80d42e1d8a638cdf6780a4
+state_head: e8242e512447787363b57a2559fb3d0a628c4ac5
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 2
+  completed_plans: 3
   percent: 20
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 2 of 5 (Storefront Supabase Identity)
-Plan: 1 of 2 in current phase
+Plan: 2 of 2 in current phase
 Status: Ready to execute
 Last activity: 2026-10-08 — Phase 1 (`01-01`) executed (SSR clients, env templates, middleware, supabase init)
 
@@ -58,6 +58,7 @@ Progress: [██░░░░░░░░] 20%
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 02 P01 | 25min | 3 tasks | 5 files |
+| Phase 02 P02 | 20min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Recent decisions affecting current work:
 - Mode: mvp — hard cutover without v2 auth-quality extras
 - Planning: tracer-first plans; autonomous execution; no blocking reversibility gates
 - [Phase 02]: Identity success without Medusa JWT; Phase 3 exchanges access_token
+- [Phase 02]: Local enable_confirmations=false; prod enables confirmations+SMTP
 
 ### Pending Todos
 
@@ -91,6 +93,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07T23:30:16.353Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-10-07T23:31:50.405Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None

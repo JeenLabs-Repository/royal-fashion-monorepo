@@ -49,12 +49,12 @@ Plans:
   4. Shopper can complete email verification via Supabase confirm flow under the configured local/prod confirmation policy
   5. Shopper can request a password reset email and set a new password via Supabase recovery
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
 **UI hint:** yes
 
 Plans:
 - [x] 02-01-PLAN.md — Register/login/logout via Supabase Server Actions (AUTH-01..03)
-- [ ] 02-02-PLAN.md — Email confirm + password reset; retire Medusa verify UX (AUTH-04..05)
+- [x] 02-02-PLAN.md — Email confirm + password reset; retire Medusa verify UX (AUTH-04..05)
 
 ### Phase 3: Medusa Customer Bridge
 
@@ -115,7 +115,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Supabase Local + SSR Foundation | 1/1 | Complete | 2026-10-08 |
-| 2. Storefront Supabase Identity | 1/2 | In Progress | - |
+| 2. Storefront Supabase Identity | 2/2 | In Progress | - |
 | 3. Medusa Customer Bridge | 0/2 | Planned | - |
 | 4. Admin Supabase Login | 0/2 | Planned | - |
 | 5. Hard Cutover | 0/1 | Planned | - |
