@@ -67,11 +67,11 @@ Plans:
   2. Authenticated Store API calls succeed with a Medusa customer credential/session (not Supabase-only Store calls)
   3. Guest cart transfers to the authenticated customer after successful Medusa customer bind
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
 
 Plans:
 - [x] 03-01-PLAN.md — Custom `supabase` Auth provider + customer link workflow (BRIDGE-01..02)
-- [ ] 03-02-PLAN.md — Storefront token exchange + transferCart (BRIDGE-02..03)
+- [x] 03-02-PLAN.md — Storefront token exchange + transferCart (BRIDGE-02..03)
 
 ### Phase 4: Admin Supabase Login
 
@@ -116,7 +116,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Supabase Local + SSR Foundation | 1/1 | Complete | 2026-10-08 |
 | 2. Storefront Supabase Identity | 2/2 | In Progress | - |
-| 3. Medusa Customer Bridge | 1/2 | In Progress | - |
+| 3. Medusa Customer Bridge | 2/2 | In Progress | - |
 | 4. Admin Supabase Login | 0/2 | Planned | - |
 | 5. Hard Cutover | 0/1 | Planned | - |
 

@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **BRIDGE-01**: After Supabase auth, system finds or creates a Medusa Customer linked by email and/or Supabase user id
 - [x] **BRIDGE-02**: Authenticated Store API calls succeed with a Medusa customer credential/session (bridge after Supabase login; not Supabase-only Store calls)
-- [ ] **BRIDGE-03**: Guest cart transfers to the authenticated customer after successful Medusa customer bind (existing `transferCart` contract preserved)
+- [x] **BRIDGE-03**: Guest cart transfers to the authenticated customer after successful Medusa customer bind (existing `transferCart` contract preserved)
 
 ### Admin authentication
 
@@ -79,7 +79,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-05 | Phase 2 | Complete |
 | BRIDGE-01 | Phase 3 | Complete |
 | BRIDGE-02 | Phase 3 | Complete |
-| BRIDGE-03 | Phase 3 | Pending |
+| BRIDGE-03 | Phase 3 | Complete |
 | ADMIN-01 | Phase 4 | Pending |
 | ADMIN-02 | Phase 4 | Pending |
 | ADMIN-03 | Phase 4 | Pending |
