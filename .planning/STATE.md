@@ -3,16 +3,16 @@ gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Storefront Supabase Identity
 status: verifying
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-10-07T23:39:49.440Z"
+stopped_at: Completed 05-01-PLAN.md — all remaining plans done
+last_updated: "2026-10-07T23:41:06.495Z"
 last_activity: 2026-10-08
 last_activity_desc: Phase 1 (`01-01`) executed (SSR clients, env templates, middleware, supabase init)
-state_head: b907199f64cfb8c24cd8cf2eb7e8e6814bc322cf
+state_head: 9ee13b560dfabe1a3e37f9c50a0678bade62a494
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 8
   percent: 20
 ---
 
@@ -62,6 +62,8 @@ Progress: [██░░░░░░░░] 20%
 | Phase 03 P01 | 35min | 3 tasks | 9 files |
 | Phase 03 P02 | 15min | 2 tasks | 2 files |
 | Phase 04 P01 | 25min | 3 tasks | 10 files |
+| Phase 04 P02 | 10min | 2 tasks | 3 files |
+| Phase 05 P01 | 20min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -79,6 +81,7 @@ Recent decisions affecting current work:
 - [Phase 03]: Supabase Auth provider uses getUser; customer methods supabase-only
 - [Phase 03]: Storefront binds Medusa JWT via supabase provider before success
 - [Phase 04]: Admin entry /app/supabase-login; User must be pre-provisioned
+- [Phase 05]: Hard cutover: Auth providers supabase-only; JWT_SECRET rotate documented
 
 ### Pending Todos
 
@@ -99,6 +102,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-10-07T23:39:49.409Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-10-07T23:41:06.458Z
+Stopped at: Completed 05-01-PLAN.md — all remaining plans done
 Resume file: None

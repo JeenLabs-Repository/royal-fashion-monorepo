@@ -84,12 +84,12 @@ Plans:
   2. After Supabase Admin login, Admin APIs and `/app` work under an established Medusa `user` actor session
   3. Operator can provision the first admins using a documented bootstrap/invite-then-link runbook (no chicken-and-egg lockout)
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed
 **UI hint:** yes
 
 Plans:
 - [x] 04-01-PLAN.md — Admin Supabase login UI + user actor session (ADMIN-01..02)
-- [ ] 04-02-PLAN.md — Bootstrap/invite-then-link runbook + helper script (ADMIN-03)
+- [x] 04-02-PLAN.md — Bootstrap/invite-then-link runbook + helper script (ADMIN-03)
 
 ### Phase 5: Hard Cutover
 
@@ -102,10 +102,10 @@ Plans:
   2. Medusa Admin native password login is removed or unreachable after the Supabase Admin path ships
   3. Existing Medusa password users see re-register / Supabase reset messaging (no hash migration); old Medusa JWTs no longer grant auth entry
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans executed
 
 Plans:
-- [ ] 05-01-PLAN.md — Remove emailpass, Admin password entry, cutover messaging + JWT invalidate (CUT-01..03)
+- [x] 05-01-PLAN.md — Remove emailpass, Admin password entry, cutover messaging + JWT invalidate (CUT-01..03)
 
 ## Progress
 
@@ -117,8 +117,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Supabase Local + SSR Foundation | 1/1 | Complete | 2026-10-08 |
 | 2. Storefront Supabase Identity | 2/2 | In Progress | - |
 | 3. Medusa Customer Bridge | 2/2 | In Progress | - |
-| 4. Admin Supabase Login | 1/2 | In Progress | - |
-| 5. Hard Cutover | 0/1 | Planned | - |
+| 4. Admin Supabase Login | 2/2 | In Progress | - |
+| 5. Hard Cutover | 1/1 | In Progress | - |
 
 ## Coverage Map
 

@@ -31,13 +31,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **ADMIN-01**: Operator can log into Medusa Admin with Supabase email/password (not Medusa-native password login)
 - [x] **ADMIN-02**: After Supabase Admin login, a Medusa `user` actor session is established so Admin APIs/`/app` work
-- [ ] **ADMIN-03**: Admin bootstrap/invite-then-link runbook exists so first operators can be provisioned without chicken-and-egg
+- [x] **ADMIN-03**: Admin bootstrap/invite-then-link runbook exists so first operators can be provisioned without chicken-and-egg
 
 ### Hard cutover
 
-- [ ] **CUT-01**: All Medusa customer `emailpass` register/login/verify/reset paths are removed from storefront and config (no silent fallback)
-- [ ] **CUT-02**: Medusa Admin native password login is removed or unreachable after Supabase Admin path ships
-- [ ] **CUT-03**: Existing Medusa password users are handled via re-register / Supabase reset messaging (no hash migration); old Medusa JWTs invalidated for auth entry
+- [x] **CUT-01**: All Medusa customer `emailpass` register/login/verify/reset paths are removed from storefront and config (no silent fallback)
+- [x] **CUT-02**: Medusa Admin native password login is removed or unreachable after Supabase Admin path ships
+- [x] **CUT-03**: Existing Medusa password users are handled via re-register / Supabase reset messaging (no hash migration); old Medusa JWTs invalidated for auth entry
 
 ## v2 Requirements
 
@@ -82,10 +82,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRIDGE-03 | Phase 3 | Complete |
 | ADMIN-01 | Phase 4 | Complete |
 | ADMIN-02 | Phase 4 | Complete |
-| ADMIN-03 | Phase 4 | Pending |
-| CUT-01 | Phase 5 | Pending |
-| CUT-02 | Phase 5 | Pending |
-| CUT-03 | Phase 5 | Pending |
+| ADMIN-03 | Phase 4 | Complete |
+| CUT-01 | Phase 5 | Complete |
+| CUT-02 | Phase 5 | Complete |
+| CUT-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 17 total
