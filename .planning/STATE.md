@@ -23,17 +23,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-08)
 
 **Core value:** A shopper or admin can sign up / log in with email and password via Supabase, and Medusa still recognizes them for store or admin work — with zero remaining Medusa password auth paths.
-**Current focus:** Phase 2: Storefront Supabase Identity — execute `02-01-PLAN.md`
+**Current focus:** All 5 phase plans executed — ready for `/gsd-verify-work` / phase verification
 **Mode:** mvp
 
 ## Current Position
 
-Phase: 2 of 5 (Storefront Supabase Identity)
-Plan: 2 of 2 in current phase
-Status: Phase complete — ready for verification
-Last activity: 2026-10-08 — Phase 1 (`01-01`) executed (SSR clients, env templates, middleware, supabase init)
+Phase: 5 of 5 (Hard Cutover)
+Plan: 1 of 1 in current phase
+Status: All plans complete — ready for verification
+Last activity: 2026-10-08 — Phases 2–5 executed (identity, bridge, admin login, hard cutover)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
