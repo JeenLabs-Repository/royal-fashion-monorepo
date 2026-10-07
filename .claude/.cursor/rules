@@ -1,0 +1,365 @@
+<!-- gsd-project-start source:PROJECT.md -->
+## Project
+
+**Royal Fashion — Supabase Auth Migration**
+
+A brownfield Medusa DTC monorepo (`apps/backend` + `apps/storefront`) for Royal Fashion commerce. This milestone replaces **all native Medusa authentication** (storefront customer `emailpass` and Admin user login) with **Supabase Auth email/password only**, using self-hosted Supabase in development (local defaults + MCP). Commerce (customers, carts, orders) stays on Medusa; identity and passwords live in Supabase.
+
+**Core Value:** A shopper or admin can sign up / log in with email and password via Supabase, and Medusa still recognizes them for store or admin work — with zero remaining Medusa password auth paths.
+
+### Constraints
+
+- **Tech stack**: Stay on Medusa 2.21 + Next.js 15 storefront + pnpm workspace — no greenfield rewrite
+- **Auth methods**: Email/password only in v1
+- **Dev identity host**: Self-hosted Supabase local defaults (`127.0.0.1:54321`)
+- **Commerce link**: Must create/link Medusa customer (and admin actor) from Supabase user — not commerce-without-Medusa-customer
+- **Removal**: Native Medusa password auth must be fully removed, not left as fallback
+- **Migration**: No existing password import in v1
+- **Security**: Prefer httpOnly cookies / server-side session handling; do not expose service-role keys to the browser
+<!-- gsd-project-end -->
+
+<!-- gsd-stack-start source:codebase/STACK.md -->
+## Technology Stack
+
+## Languages
+- TypeScript 5.x — Application code in `apps/backend` (Medusa) and `apps/storefront` (Next.js); backend pins `typescript` `^5.6.2`, storefront pins `^5.3.2`
+- JavaScript — Config and tooling (`apps/storefront/next.config.js`, `apps/storefront/check-env-variables.js`, `apps/storefront/tailwind.config.js`, `apps/backend/jest.config.js`)
+## Runtime
+- Node.js `>=22.22.0` — Enforced via `engines` in root `package.json` and `apps/backend/package.json`
+- Browser runtime — Next.js App Router storefront (React 19 client/server components)
+- pnpm `10.33.0` — Declared as `packageManager` in root and both apps
+- Lockfile: `pnpm-lock.yaml` present at repo root
+- Workspace: `pnpm-workspace.yaml` includes `apps/**`, excludes `apps/backend/.medusa/**`
+## Frameworks
+- Medusa `@medusajs/medusa` / `@medusajs/framework` `2.21.2` — Headless commerce backend (`apps/backend`)
+- Next.js `15.5.24` — Storefront (`apps/storefront`), Turbopack in `pnpm dev`
+- React `19.0.5` (storefront) / React `18.3.1` (root/backend admin tooling) — UI for storefront and Medusa Admin extensions
+- Jest `^29.7.0` — Backend unit + integration tests via `apps/backend/jest.config.js` and `@medusajs/test-utils` `2.21.2`
+- Storefront — No test suite / test scripts detected
+- Turbo `^2.0.14` — Monorepo task runner (`turbo.json`: `build`, `dev`, `start`, `lint`, `test`, `seed`)
+- Medusa CLI `@medusajs/cli` `2.21.2` — `medusa develop` / `medusa build` / `medusa start`
+- SWC (`@swc/core`, `@swc/jest`) — Jest transforms and `ts-node` SWC mode in `apps/backend/tsconfig.json`
+- Vite `^7.3.6` — Backend admin extension tooling dependency
+- Tailwind CSS `^3.0.23` + `@medusajs/ui-preset` — Storefront styling (`apps/storefront/tailwind.config.js`)
+- ESLint 9 + `@medusajs/eslint-plugin` `2.21.2` — Root `eslint.config.ts` (recommended Medusa rules); storefront uses `eslint-config-next`
+- Prettier — Root `^3.2.5`, storefront `^2.8.8`
+## Key Dependencies
+- `@medusajs/js-sdk` `2.21.2` — Storefront → Medusa HTTP client (`apps/storefront/src/lib/config.ts`)
+- `@medusajs/types` `2.21.2` — Shared HTTP/domain types on the storefront
+- `@medusajs/instantsearch-adapter` `2.21.2` + `react-instantsearch` / `instantsearch.js` — Product search UI over Medusa `/store/search` (`apps/storefront/src/lib/search-client.ts`)
+- `@stripe/stripe-js` / `@stripe/react-stripe-js` — Checkout payment Elements for Stripe / Medusa Payments (`apps/storefront/src/modules/checkout/components/payment-wrapper/`)
+- `zod` `4.2.0` — Backend validation dependency (Medusa stack)
+- `@tanstack/react-query` `5.64.2` — Admin dashboard data fetching (Medusa Admin)
+- PostgreSQL (external) — Primary datastore via `DATABASE_URL` in `apps/backend/medusa-config.ts`; README requires PostgreSQL 15+
+- Redis (optional / template) — `REDIS_URL` listed in `apps/backend/.env.template`; not wired in current `medusa-config.ts`
+- `@medusajs/caching` `2.21.2` — Medusa caching module package
+- `@medusajs/dashboard` / `@medusajs/admin-sdk` `2.21.2` — Admin UI and extension SDK
+- `@medusajs/draft-order` `2.21.2` — Draft order commerce module
+- `@medusajs/ui` `4.2.6` / `@medusajs/icons` — Admin + storefront UI primitives
+- Headless UI / Radix (`@headlessui/react`, `@radix-ui/react-accordion`, `@radix-ui/react-slider`) — Storefront interactive UI
+- `pg` `^8.11.3` — Present in storefront `package.json` but unused by application source imports
+## Configuration
+- Backend: copy `apps/backend/.env.template` → `apps/backend/.env` (gitignored `.env` may exist locally — do not commit secrets)
+- Storefront: `apps/storefront/.env.local` (documented in `README.md`; `.env.template` for storefront is referenced but not present in tree)
+- Backend loads env via `loadEnv` in `apps/backend/medusa-config.ts`
+- Storefront fails boot without `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` (`apps/storefront/check-env-variables.js` invoked from `next.config.js`)
+- `DATABASE_URL` — PostgreSQL connection string
+- `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS` — CORS allowlists
+- `JWT_SECRET`, `COOKIE_SECRET` — Auth/session signing (required in production by Medusa)
+- `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` — Required
+- `NEXT_PUBLIC_MEDUSA_BACKEND_URL` — Defaults to `http://localhost:9000`
+- `NEXT_PUBLIC_DEFAULT_REGION` — Defaults to `dk`
+- `NEXT_PUBLIC_BASE_URL` — Defaults to `https://localhost:8000`
+- `NEXT_PUBLIC_STRIPE_KEY` or `NEXT_PUBLIC_MEDUSA_PAYMENTS_PUBLISHABLE_KEY` (+ optional `NEXT_PUBLIC_MEDUSA_PAYMENTS_ACCOUNT_ID`) — Stripe-like checkout
+- Optional Medusa Cloud image hosts: `MEDUSA_CLOUD_S3_HOSTNAME`, `MEDUSA_CLOUD_S3_PATHNAME`
+- Optional sitemap: `NEXT_PUBLIC_VERCEL_URL` in `apps/storefront/next-sitemap.js`
+- Root: `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `eslint.config.ts`
+- Backend: `apps/backend/medusa-config.ts`, `apps/backend/tsconfig.json`, `apps/backend/jest.config.js`, `apps/backend/eslint.config.ts`
+- Storefront: `apps/storefront/next.config.js`, `apps/storefront/tsconfig.json` (path aliases `@lib/*`, `@modules/*`, `@pages/*`), `apps/storefront/tailwind.config.js`, `apps/storefront/postcss.config.js`
+## Platform Requirements
+- Node.js ≥ 22.22.0, pnpm 10.x
+- PostgreSQL 15+ with a created database pointed at by `DATABASE_URL`
+- Redis optional (template default `redis://localhost:6379`)
+- Backend: `http://localhost:9000` (admin at `/app`)
+- Storefront: `http://localhost:8000` (`next dev --turbopack -p 8000`)
+- No Docker Compose / Dockerfile at repo root for local stack
+- Primary documented target: [Medusa Cloud](https://cloud.medusajs.com) (`README.md`)
+- Backend: `medusa build` → `medusa start` (Node host with PostgreSQL)
+- Storefront: Next.js `next build` / `next start -p 8000` (Vercel-oriented env names present: `NEXT_PUBLIC_VERCEL_URL`)
+- Image CDN patterns assume AWS S3 / Medusa Cloud S3 (`apps/storefront/next.config.js` `images.remotePatterns`)
+<!-- gsd-stack-end -->
+
+<!-- gsd-conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+## Naming Patterns
+- Use **kebab-case** for source files and folders: `seed-demo-products.ts`, `localized-client-link/`, `product-option-filters.ts`
+- API routes are always named `route.ts` under a path folder: `apps/backend/src/api/store/custom/route.ts`, `apps/backend/src/api/admin/custom/route.ts`
+- Middleware lives in `apps/backend/src/api/middlewares.ts`
+- Storefront feature UI lives under `apps/storefront/src/modules/<domain>/components/<name>/index.tsx` (folder + `index.tsx`, not `Name.tsx` at the folder root)
+- Storefront templates: `apps/storefront/src/modules/<domain>/templates/` (often `index.tsx` or `*-template.tsx`)
+- Backend search helpers: `apps/backend/src/search/helpers/<name>.ts`
+- Custom Medusa modules: `apps/backend/src/modules/<module-name>/` with `models/`, `service.ts`, `index.ts` (see `apps/backend/src/modules/README.md`)
+- Workflows: `apps/backend/src/workflows/<name>.ts` and steps under `apps/backend/src/workflows/steps/` when splitting steps
+- Use **camelCase**: `retrieveCart`, `toDocument`, `loadPricing`, `convertToLocale`, `makeRandom`
+- Export HTTP handlers as named exports matching the method: `GET`, `POST`, `DELETE` in `route.ts` files
+- Prefer named `export async function` or `export const fn = async` for storefront server actions in `apps/storefront/src/lib/data/`
+- Unused params: prefix with `_` (ESLint allows `^_`): `_currentState` in `apps/storefront/src/lib/data/customer.ts`
+- Use **camelCase** for locals and module-level values: `salesChannel`, `currencyCodes`, `MEDUSA_BACKEND_URL`
+- Use **SCREAMING_SNAKE** for true constants: `PRODUCT_COUNT`, `BATCH_SIZE`, `PRICE_CURRENCIES`, `HANDLE_PREFIX` in `apps/backend/src/scripts/seed-demo-products.ts` and `apps/backend/src/search/helpers/pricing.ts`
+- Booleans: prefer clear names (`verification_required` from API shapes; local flags like presence checks via `Boolean(...)`)
+- Use **PascalCase** for types/interfaces: `ProductRow`, `ProductDocument`, `ConvertToLocaleParams`, `FeaturedProduct`, `VariantPrice` (`apps/storefront/src/types/global.ts`)
+- Prefer `type` aliases colocated with the module that owns them
+- Reuse Medusa SDK/framework types: `HttpTypes.StoreCart`, `MedusaRequest`, `MedusaResponse`, `SearchTypes.InferSearchDocumentType`
+- Props types: `<ComponentName>Props` next to the component (`ProductTabsProps` in `apps/storefront/src/modules/products/components/product-tabs/index.tsx`)
+- Table/model names and columns: **snake_case** (project AGENTS + module README examples: `model.define("post", { ... })`)
+- Module registration names: **camelCase** only (no dashes) — Medusa skill rule `type-module-name-camelcase`
+## Code Style
+- Project rule (authoritative for new code): **no semicolons**, **double quotes**, **2-space indent** (`AGENTS.md` Code Style)
+- Storefront Prettier: `apps/storefront/.prettierrc.json` sets `"semi": false` only — run Prettier against storefront files to match
+- Root has Prettier as a dep (`package.json`) but **no root `.prettierrc`** — do not invent a second style; follow AGENTS + storefront prettier
+- Existing backend files are mixed (some use semicolons/`@medusajs/...` imports with `;`, e.g. `apps/backend/src/api/store/custom/route.ts` and `apps/backend/src/search/product.ts`; others use no semis / single quotes, e.g. `apps/backend/src/api/middlewares.ts`, `apps/backend/src/scripts/seed-demo-products.ts`). **When editing a file, match that file’s local style; for new files, use no semicolons + double quotes.**
+- Backend + root: ESLint 9 flat config via `eslint.config.ts` and `apps/backend/eslint.config.ts` — `defineConfig([...medusa.configs.recommended])` from `@medusajs/eslint-plugin`
+- Run backend lint with `cd apps/backend && pnpm run lint` (`medusa lint`)
+- Storefront: `apps/storefront/.eslintrc.json` extends `next/core-web-vitals` and `next/typescript`; unused vars error with `_` ignore patterns
+- Run storefront lint with `cd apps/storefront && pnpm run lint` (`next lint`)
+- Root: `pnpm run lint` → Turbo `lint` across packages
+- **Never disable `@medusajs/*` ESLint rules** to silence failures — fix the Medusa pattern instead (`AGENTS.md`)
+## Import Organization
+- `@lib/*` → `apps/storefront/src/lib/*` (`apps/storefront/tsconfig.json`)
+- `@modules/*` → `apps/storefront/src/modules/*`
+- `@pages/*` → `apps/storefront/src/pages/*`
+- Backend: relative imports from `src/` (no `@/` alias in `apps/backend/tsconfig.json`)
+- Use **static top-level imports** for workflows/modules — no `await import()` inside route bodies
+- Import Zod from `@medusajs/framework/zod`, not bare `zod` (framework is Zod v4)
+- Prefer framework HTTP types from `@medusajs/framework/http` or `@medusajs/framework` as used in existing routes
+- Use `clsx` directly or the re-export `clx` from `apps/storefront/src/modules/common/components/ui/index.tsx` (`export { clsx as clx }`)
+## Error Handling
+- **Backend domain failures:** throw `MedusaError` with a typed variant:
+- **Storefront SDK / fetch failures:** pipe through `medusaError` from `apps/storefront/src/lib/util/medusa-error.ts` (logs response details, rethrows `Error` with capitalized message):
+- **Soft failures:** return `null` when absence is expected (e.g. `retrieveCart` `.catch(() => null)`)
+- **Auth / form actions:** return typed state objects instead of throwing when the UI needs the message (`{ state: "error", error: String(error) }` in `apps/storefront/src/lib/data/customer.ts`)
+- **Simple domain checks:** `throw new Error("...")` for missing cart/region in server actions
+- Do not call module services for mutations from routes — use workflows (layer rule); validation belongs in workflow steps
+## Logging
+- Backend scripts/seeds: resolve Medusa logger via `container.resolve(ContainerRegistrationKeys.LOGGER)` then `logger.info(...)` — see `apps/backend/src/migration-scripts/initial-data-seed.ts`, `apps/backend/src/scripts/seed-demo-products.ts`
+- Storefront error helper: `console.error` for request/response diagnostics inside `medusaError`
+- Stub/unimplemented UI: `console.info` (e.g. password update stub in account profile)
+- Prefer Medusa `LOGGER` for backend operational progress, not ad-hoc `console.log` in production paths
+- Keep error logs in `medusaError` before rethrowing so server actions surface a clean `Error` message to callers
+## Comments
+- File-level purpose for scripts (what it does, how to run, idempotency) — `apps/backend/src/scripts/seed-demo-products.ts`
+- Non-obvious invariants (search field filterable vs retrievable, currency index sync) — `apps/backend/src/search/product.ts`, `apps/backend/src/search/helpers/pricing.ts`
+- Middleware intent above `defineMiddlewares` — `apps/backend/src/api/middlewares.ts`
+- JSDoc on public storefront data helpers when documenting params/returns — `retrieveCart` in `apps/storefront/src/lib/data/cart.ts`
+- Avoid narrating obvious code; comment “why” and operational constraints
+- Use JSDoc for exported storefront data functions where callers need field/caching behavior
+- Component header comments for shared primitives (`LocalizedClientLink` in `apps/storefront/src/modules/common/components/localized-client-link/index.tsx`)
+## Function Design
+- Keep route handlers thin (resolve + run workflow / return status) — starter routes in `apps/backend/src/api/**/route.ts` are intentionally minimal
+- Put indexing/transform logic in helpers under `apps/backend/src/search/helpers/`
+- Split UI into colocated subcomponents in the same file when small (`ProductInfoTab` inside product-tabs), or sibling files under the component folder
+- Prefer object params for multi-arg actions: `addToCart({ variantId, quantity, countryCode })` in `apps/storefront/src/lib/data/cart.ts`
+- Server actions used as form actions: `(currentState, formData: FormData)` signature
+- Typed request generics on Medusa routes when validating bodies (`MedusaRequest<T>` / `AuthenticatedMedusaRequest` per Medusa skill)
+- Explicit return types on critical helpers when useful (`medusaError(...): never`, `convertToLocale` string)
+- Prefer returning domain objects (`cart`, `customer`) or `null`; auth flows return discriminated state unions
+- HTTP: only **GET / POST / DELETE** on Medusa API routes — never PUT/PATCH
+## Module Design
+- Storefront components: **default export** the component from `index.tsx` (dominant pattern under `apps/storefront/src/modules/**`)
+- Storefront utils: **named exports** (`convertToLocale`, `clx` / UI primitives)
+- Backend routes: **named exports** of HTTP methods
+- Backend modules: `export default Module(NAME, { service })` plus a `NAME_MODULE` constant (`apps/backend/src/modules/README.md`)
+- Workflows: `export default` the workflow created with `createWorkflow`
+- Admin widgets: default export component + `export const config = defineWidgetConfig({ zone: "..." })` (`apps/backend/src/admin/README.md`)
+- Use sparingly: UI barrel at `apps/storefront/src/modules/common/components/ui/index.tsx`
+- Prefer deep imports via `@modules/...` / `@lib/...` over large barrels
+- Admin i18n: `apps/backend/src/admin/i18n/index.ts` currently exports `{}` as placeholder
+- Mutations go through workflows; routes must not call module services for writes
+- Cross-module reads: `query.graph()` / `query.index()` as appropriate; do not filter linked data in JS
+- Mark data modules `"use server"` under `apps/storefront/src/lib/data/`
+- Mark interactive components `"use client"`
+- SDK singleton: `apps/storefront/src/lib/config.ts` (`sdk`); never call Medusa store APIs without `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`
+<!-- gsd-conventions-end -->
+
+<!-- gsd-architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+## System Overview
+```text
+```
+## Component Responsibilities
+| Component | Responsibility | File |
+|-----------|----------------|------|
+| Turborepo root | Workspace scripts, lint/test orchestration | `package.json`, `turbo.json`, `pnpm-workspace.yaml` |
+| Storefront middleware | Country/region URL prefix, `_medusa_cache_id` cookie | `apps/storefront/src/middleware.ts` |
+| Medusa SDK client | Typed Store/Auth API client + locale header injection | `apps/storefront/src/lib/config.ts` |
+| Cookie session layer | JWT, cart id, pending signup, cache tags | `apps/storefront/src/lib/data/cookies.ts` |
+| Customer auth actions | Register/login/verify/signout + cart transfer | `apps/storefront/src/lib/data/customer.ts` |
+| Cart / checkout actions | Cart CRUD, payment session, place order | `apps/storefront/src/lib/data/cart.ts` |
+| Account parallel routes | Logged-in dashboard vs login slot | `apps/storefront/src/app/[countryCode]/(main)/account/layout.tsx` |
+| Search adapter | InstantSearch → `POST /store/search` | `apps/storefront/src/lib/search-client.ts` |
+| Payment return route | Stripe redirect resume + `placeOrder` | `apps/storefront/src/app/api/payment-return/route.ts` |
+| Medusa config | DB URL, CORS, JWT/cookie secrets | `apps/backend/medusa-config.ts` |
+| Store search middleware | Restrict searchable indexes to product | `apps/backend/src/api/middlewares.ts` |
+| Product search index | Index fields, pricing, facets | `apps/backend/src/search/product.ts` |
+| Seed / migrations | Initial store, regions, products, API keys | `apps/backend/src/migration-scripts/initial-data-seed.ts` |
+| Custom API stubs | Placeholder store/admin routes | `apps/backend/src/api/store/custom/route.ts`, `apps/backend/src/api/admin/custom/route.ts` |
+## Pattern Overview
+- Backend owns commerce domain (auth identities, customers, carts, orders, catalog, search); storefront is a typed BFF/UI client over the Medusa Store API
+- Storefront uses React Server Components and `"use server"` Server Actions in `apps/storefront/src/lib/data/*` — no separate Node BFF
+- Session is cookie-backed JWT (`_medusa_jwt`), not NextAuth/session cookies on Medusa itself
+- Region is a first-class URL segment (`/[countryCode]/...`) enforced by Edge middleware
+- Backend customizations are thin today: search index + seed scripts; modules/workflows/subscribers dirs are scaffolded for extension
+## Layers
+- Purpose: Render commerce UI; collect form input; compose layouts
+- Location: `apps/storefront/src/modules/`, `apps/storefront/src/app/`
+- Contains: Feature modules (account, cart, checkout, products, store, layout), route `page.tsx` / layouts, parallel route slots
+- Depends on: Data layer Server Actions and loaders under `apps/storefront/src/lib/data/`
+- Used by: Browser via Next.js App Router
+- Purpose: Orchestrate Medusa SDK calls, cookies, cache tags, redirects
+- Location: `apps/storefront/src/lib/data/`
+- Contains: `customer.ts`, `cart.ts`, `products.ts`, `regions.ts`, `orders.ts`, `payment.ts`, etc.
+- Depends on: `sdk` from `apps/storefront/src/lib/config.ts`, cookies from `apps/storefront/src/lib/data/cookies.ts`
+- Used by: App Router pages and client components via `useActionState` / form actions
+- Purpose: Single HTTP client to Medusa with publishable key + optional Bearer auth + `x-medusa-locale`
+- Location: `apps/storefront/src/lib/config.ts`
+- Contains: `Medusa` JS SDK instance, wrapped `sdk.client.fetch`
+- Depends on: `NEXT_PUBLIC_MEDUSA_BACKEND_URL`, `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY`
+- Used by: All storefront data modules and some API routes
+- Purpose: Expose Store and Admin REST APIs; attach route middlewares
+- Location: `apps/backend/src/api/` (file-based `route.ts`)
+- Contains: Custom store/admin routes, `middlewares.ts` for `/store/search`
+- Depends on: Medusa framework HTTP helpers, DI container (`req.scope`)
+- Used by: Storefront SDK, Admin dashboard, InstantSearch adapter
+- Purpose: Business logic as composable workflows and module services
+- Location: `apps/backend/src/workflows/`, `apps/backend/src/modules/`, core flows from `@medusajs/medusa/core-flows`
+- Contains: Scaffold READMEs for custom modules/workflows; seed uses core workflows extensively
+- Depends on: Medusa module services and Query/Link APIs
+- Used by: API routes, subscribers, jobs, migration scripts
+- Purpose: Define product documents for Medusa store search
+- Location: `apps/backend/src/search/`
+- Contains: `product.ts` + helpers (`pricing.ts`, `option-values.ts`, `resolve-product-ids.ts`)
+- Depends on: Framework search utilities (`defineSearchIndex`, graph seed/consume)
+- Used by: `POST /store/search` (gated by `configureStoreSearch` in `apps/backend/src/api/middlewares.ts`)
+- Purpose: Durable commerce state
+- Location: PostgreSQL via `DATABASE_URL` in `apps/backend/medusa-config.ts`
+- Contains: Medusa core tables + any future custom module models
+- Depends on: Medusa ORM / module data models
+- Used by: All backend modules and workflows
+## Data Flow
+### Primary Request Path (catalog / cart page)
+### Customer Auth / Session Flow
+### Checkout / Payment Flow
+### Search Flow
+- Server: Medusa/PostgreSQL is source of truth for customers, carts, orders, catalog
+- Browser session: httpOnly cookies `_medusa_jwt`, `_medusa_cart_id`, `_medusa_pending_customer`, `_medusa_cache_id` (`apps/storefront/src/lib/data/cookies.ts`)
+- UI cache: Next.js `revalidateTag` + per-visitor cache id tags (`getCacheTag`)
+- Client React state: local UI only (dropdowns, Stripe elements, InstantSearch widgets) — not the commerce session
+## Key Abstractions
+- Purpose: Typed client for Auth + Store APIs
+- Examples: `apps/storefront/src/lib/config.ts`, callers in `apps/storefront/src/lib/data/*.ts`
+- Pattern: Singleton module export; fetch wrapper injects locale header
+- Purpose: Bridge Next cookies ↔ Medusa auth/cart identity
+- Examples: `getAuthHeaders`, `setAuthToken`, `getCartId`, `setPendingCustomer` in `apps/storefront/src/lib/data/cookies.ts`
+- Pattern: `server-only` helpers; httpOnly cookies; `sameSite: "lax"` for JWT/cart (payment redirects)
+- Purpose: Mutating commerce operations from forms
+- Examples: `apps/storefront/src/lib/data/customer.ts`, `apps/storefront/src/lib/data/cart.ts`
+- Pattern: `"use server"` file; FormData actions return discriminated unions (e.g. `CustomerAuthState`)
+- Purpose: Domain-grouped presentational components and templates
+- Examples: `apps/storefront/src/modules/account/`, `apps/storefront/src/modules/checkout/`
+- Pattern: `components/` + `templates/`; imported via `@modules/*`
+- Purpose: HTTP endpoints under `/store/*` and `/admin/*`
+- Examples: `apps/backend/src/api/store/custom/route.ts`
+- Pattern: Export named HTTP methods (`GET`, `POST`, ...) from `route.ts`
+- Purpose: Declares searchable/filterable product fields and document mapping
+- Examples: `apps/backend/src/search/product.ts`
+- Pattern: `defineSearchIndex` + graph seed/consume helpers
+- Purpose: Idempotent commerce setup via Medusa core flows
+- Examples: `createProductsWorkflow`, `createRegionsWorkflow` in `apps/backend/src/migration-scripts/initial-data-seed.ts`
+- Pattern: Resolve container services; run workflows; link resources
+## Entry Points
+- Location: `apps/storefront/src/app/`
+- Triggers: Browser navigation to `http://localhost:8000`
+- Responsibilities: Layouts, pages, parallel account slots, payment-return API
+- Location: `apps/storefront/src/middleware.ts`
+- Triggers: Matched navigations (excludes static assets/api)
+- Responsibilities: Region map fetch, country redirect, cache id cookie
+- Location: `apps/storefront/src/lib/data/*.ts`
+- Triggers: Form posts / action invocations from modules
+- Responsibilities: Auth, cart, orders, profile mutations
+- Location: `apps/backend` via `medusa develop` / `medusa start` (`apps/backend/package.json`)
+- Triggers: `pnpm run backend:dev` / Turbo `dev` filter `@dtc/backend`
+- Responsibilities: Store API `:9000`, Admin UI `/app`, auth, search, jobs
+- Location: `apps/backend/src/api/**/route.ts`
+- Triggers: HTTP to Store/Admin paths
+- Responsibilities: Custom endpoints (stubs today) + middleware registration
+- Location: `apps/backend/src/migration-scripts/initial-data-seed.ts`, `apps/backend/src/scripts/seed-demo-products.ts`
+- Triggers: `pnpm run backend:seed` / Medusa script runners
+- Responsibilities: Bootstrap store data for local/dev
+## Architectural Constraints
+- **Threading:** Node single-threaded event loop for Medusa and Next server; storefront middleware runs on Edge — cannot use Node-only Medusa JS SDK there (uses raw `fetch` for regions)
+- **Global state:** In-memory `regionMapCache` in `apps/storefront/src/middleware.ts`; singleton `sdk` in `apps/storefront/src/lib/config.ts`
+- **Circular imports:** Avoid importing UI modules into `lib/data` or cookies into client components; cookies module is `server-only`
+- **Auth actor model:** Auth identity (emailpass) is distinct from Customer actor — login may yield a token that still requires `customer.create` before `/store/customers/me` works (`completeLogin` in `apps/storefront/src/lib/data/customer.ts`)
+- **Publishable key required:** Store API calls from storefront must send `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` (SDK config); middleware region fetch sets `x-publishable-api-key` explicitly
+- **CORS / secrets:** Backend `STORE_CORS`, `AUTH_CORS`, `ADMIN_CORS`, `JWT_SECRET`, `COOKIE_SECRET` configured in `apps/backend/medusa-config.ts` — storefront origin must be listed for browser-originated calls
+- **Extension points empty by default:** Put new backend domain logic in `apps/backend/src/modules/` + `workflows/`; do not put business logic in route handlers when a workflow fits
+## Anti-Patterns
+### Business logic in route handlers
+### Calling Medusa SDK from client components without auth strategy
+### Skipping cart transfer after login
+### Using `sameSite: "strict"` for JWT/cart cookies
+## Error Handling
+- `medusaError()` in `apps/storefront/src/lib/util/medusa-error.ts` logs response details and rethrows a user-facing message
+- Auth actions return `{ state: "error" | "verification_required" | "success" }` instead of throwing for form UX (`CustomerAuthState`)
+- Payment return uses `unstable_rethrow` so Next redirects propagate, then redirects to cart with `error=` query on failure (`apps/storefront/src/app/api/payment-return/route.ts`)
+- Backend stub routes return HTTP status only; framework errors surface via Medusa HTTP layer
+## Cross-Cutting Concerns
+- Customer: Medusa Auth emailpass → JWT in `_medusa_jwt` → Bearer on Store API
+- Email verification optional, driven by backend login response (`verification_required`)
+- Admin: Medusa Admin dashboard auth (separate from storefront cookies)
+- Publishable API key scopes storefront store access; never treat it as a user credential
+<!-- gsd-architecture-end -->
+
+<!-- gsd-skills-start source:skills/ -->
+## Project Skills
+
+| Skill | Description | Path |
+|-------|-------------|------|
+| building-admin-dashboard-customizations | Load automatically when planning, researching, or implementing Medusa Admin dashboard UI (widgets, custom pages, forms, tables, data loading, navigation). REQUIRED for all admin UI work in ALL modes (planning, implementation, exploration). Contains design patterns, component usage, and data loading patterns that MCP servers don't provide. | `.agents/skills/building-admin-dashboard-customizations/SKILL.md` |
+| building-storefronts | Load automatically when planning, researching, or implementing Medusa storefront features (calling custom API routes, SDK integration, React Query patterns, data fetching). REQUIRED for all storefront development in ALL modes (planning, implementation, exploration). Contains SDK usage patterns, frontend integration, and critical rules for calling Medusa APIs. | `.agents/skills/building-storefronts/SKILL.md` |
+| building-with-medusa | Load automatically when planning, researching, or implementing ANY Medusa backend features (custom modules, API routes, workflows, data models, module links, business logic). REQUIRED for all Medusa backend work in ALL modes (planning, implementation, exploration). Contains architectural patterns, best practices, and critical rules that MCP servers don't provide. | `.agents/skills/building-with-medusa/SKILL.md` |
+| creating-agents-in-medusa | "Use when building an internal admin-facing AI agent in a Medusa project. These agents are operated by merchants and store operators — not customers. Covers data models, module service, agent runtime (tools, system prompt, streamText), streaming API routes (NDJSON), and admin UI chat extensions. Load for any internal agent type: store operations assistant, product audit, cohort analysis, customer service tooling for support staff, etc. Do NOT use for customer-facing agents (storefront chatbots, buyer-side assistants)." | `.agents/skills/creating-agents-in-medusa/SKILL.md` |
+| db-generate | Generate database migrations for a Medusa module | `.agents/skills/db-generate/SKILL.md` |
+| db-migrate | Run database migrations in Medusa | `.agents/skills/db-migrate/SKILL.md` |
+| learning-medusa | Load automatically when user asks to learn Medusa development (e.g., "teach me how to build with medusa", "guide me through medusa", "I want to learn medusa"). Interactive guided tutorial where Claude acts as a coding bootcamp instructor, teaching step-by-step with checkpoints and verification. | `.agents/skills/learning-medusa/SKILL.md` |
+| new-user | Create an admin user in Medusa | `.agents/skills/new-user/SKILL.md` |
+| storefront-best-practices | ALWAYS use this skill when working on ecommerce storefronts, online stores, shopping sites. Use for ANY storefront component including checkout pages, cart, payment flows, product pages, product listings, navigation, homepage, or ANY page/component in a storefront. CRITICAL for adding checkout, implementing cart, integrating Medusa backend, or building any ecommerce functionality. Framework-agnostic (Next.js, SvelteKit, TanStack Start, React, Vue). Provides patterns, decision frameworks, backend integration guidance. | `.agents/skills/storefront-best-practices/SKILL.md` |
+| supabase | "Use when doing ANY task involving Supabase. Triggers: Supabase products (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues); client libraries and SSR integrations (supabase-js, @supabase/ssr) in Next.js, React, SvelteKit, Astro, Remix; auth issues (login, logout, sessions, JWT, cookies, getSession, getUser, getClaims, RLS); Supabase CLI or MCP server; schema changes, migrations, declarative schemas, security audits, Postgres extensions (pg_graphql, pg_cron, pg_vector); debugging and troubleshooting errors or unexpected behavior on Supabase projects (HTTP errors, Postgres errors, RLS surprises, permission denied, schema cache issues, timeouts, Edge Function crashes, Realtime drops, Storage failures) and reading or querying logs (Logs Explorer, ClickHouse)." | `.agents/skills/supabase/SKILL.md` |
+| supabase-postgres-best-practices | "Postgres best practices maintained by Supabase, for Postgres running anywhere. Load this skill BEFORE writing or changing anything that lives in a Postgres database: creating or altering tables and columns (including choosing column types), schema design, migrations and declarative schema files, RLS policies and the tests that verify them, indexes, triggers, database functions, queues and scheduled jobs (pg_cron, pgmq), vector/semantic search (pgvector), and restoring dumps (pg_restore) or importing data. Also load it when diagnosing slow queries, high CPU, timeouts, EXPLAIN plans, connection exhaustion, locking, bloat, or rows visible to the wrong user or tenant. This is not just a performance guide — schema, migration, security, and SQL authoring tasks need these rules too, even for a one-column change or a single query." | `.agents/skills/supabase-postgres-best-practices/SKILL.md` |
+| path | Inspect .project/STATE.md, report GSD Path progress, and run the next valid phase. Use only when the user explicitly invokes /path or /gsd-path. The status argument reports state without advancing; config views or edits settings without advancing. Do not infer this skill from generic project, next-step, or resume requests. | `.cursor/skills/path/SKILL.md` |
+<!-- gsd-skills-end -->
+
+<!-- gsd-workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-fast` for a trivial task inline, with no subagents and no PLAN.md
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- gsd-workflow-end -->
+
+
+
+<!-- gsd-profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- gsd-profile-end -->
