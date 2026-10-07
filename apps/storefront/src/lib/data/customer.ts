@@ -2,8 +2,8 @@
 
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
+import { createClient } from "@lib/supabase/server"
 import { HttpTypes } from "@medusajs/types"
-import { FetchError } from "@medusajs/js-sdk"
 import { revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
@@ -11,11 +11,8 @@ import {
   getCacheOptions,
   getCacheTag,
   getCartId,
-  getPendingCustomer,
   removeAuthToken,
   removeCartId,
-  removePendingCustomer,
-  setAuthToken,
   setPendingCustomer,
 } from "./cookies"
 
@@ -25,19 +22,8 @@ export type CustomerAuthState =
   | { state: "success" }
   | null
 
-// Requests a verification email for the given customer. The request must be
-// authenticated with a token tied to the auth identity (the token returned by
-// register or by a login that requires verification).
-async function requestVerificationEmail(email: string, token: string) {
-  await sdk.auth.verification.request(
-    {
-      entity_id: email,
-      entity_type: "email",
-    },
-    {
-      authorization: `Bearer ${token}`,
-    }
-  )
+function authErrorMessage(error: { message?: string } | null | undefined): string {
+  return error?.message || "Authentication failed. Please try again."
 }
 
 export const retrieveCustomer =
@@ -84,6 +70,10 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   return updateRes
 }
 
+/**
+ * Shopper register via Supabase Auth (AUTH-01). Profile fields are stored for
+ * Phase 3 Medusa customer create — not used for authorization.
+ */
 export async function signup(
   _currentState: unknown,
   formData: FormData
@@ -96,34 +86,38 @@ export async function signup(
     phone: formData.get("phone") as string,
   }
 
-  try {
-    await sdk.auth.register("customer", "emailpass", {
-      email: customerForm.email,
-      password,
-    })
-  } catch (error) {
-    const fetchError = error as FetchError
-    // An existing identity (for example, an admin user with the same email) is
-    // expected and handled: the customer can still log in to link a customer
-    // record. Any other error is surfaced.
-    if (
-      fetchError.statusText !== "Unauthorized" ||
-      fetchError.message !== "Identity with email already exists"
-    ) {
-      return { state: "error", error: String(error) }
-    }
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signUp({
+    email: customerForm.email,
+    password,
+    options: {
+      data: {
+        first_name: customerForm.first_name,
+        last_name: customerForm.last_name,
+        phone: customerForm.phone,
+      },
+    },
+  })
+
+  if (error) {
+    return { state: "error", error: authErrorMessage(error) }
   }
 
-  // Persist the extra signup fields. The customer record is created during
-  // login, which is deferred until after email verification when the backend
-  // requires it.
+  // Keep non-authz profile fields for Phase 3 customer create.
   await setPendingCustomer(customerForm)
 
-  // Continue by logging in. The login response tells us whether the backend
-  // requires email verification — we don't need a storefront-side flag.
-  return completeLogin(customerForm.email, password)
+  // When email confirmations are enabled, there is no session yet.
+  if (!data.session) {
+    return { state: "verification_required", email: customerForm.email }
+  }
+
+  return { state: "success" }
 }
 
+/**
+ * Shopper login via Supabase Auth (AUTH-02). Does not mint `_medusa_jwt`
+ * (Phase 3 will exchange via custom `supabase` provider).
+ */
 export async function login(
   _currentState: unknown,
   formData: FormData
@@ -134,121 +128,41 @@ export async function login(
   return completeLogin(email, password)
 }
 
-// Logs the customer in and reconciles the customer record. The behavior is
-// driven entirely by the backend's login response, so it works whether or not
-// email verification is enabled.
 async function completeLogin(
   email: string,
   password: string
 ): Promise<CustomerAuthState> {
-  let result: Awaited<ReturnType<typeof sdk.auth.login>>
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
-  try {
-    result = await sdk.auth.login("customer", "emailpass", { email, password })
-  } catch (error) {
-    return { state: "error", error: String(error) }
+  if (error) {
+    return { state: "error", error: authErrorMessage(error) }
   }
 
-  // A `location` is returned by third-party auth providers, which this flow
-  // doesn't support.
-  if (typeof result === "object" && "location" in result) {
-    return {
-      state: "error",
-      error: "This login method isn't supported by the storefront.",
-    }
-  }
-
-  // The backend requires email verification and the customer hasn't verified
-  // yet. Send the verification email and ask them to check their inbox.
-  if (
-    typeof result === "object" &&
-    "verification_required" in result &&
-    result.verification_required
-  ) {
-    try {
-      await requestVerificationEmail(email, result.token)
-    } catch {
-      // Ignore: the customer can resend from the verification page.
-    }
-    return { state: "verification_required", email }
-  }
-
-  if (typeof result !== "string") {
-    return {
-      state: "error",
-      error: "Authentication requires additional steps that aren't supported.",
-    }
-  }
-
-  let token = result
-
-  // The token may not be tied to a customer record yet — right after
-  // registration, or after verifying a brand-new account. Ask the backend:
-  // `/store/customers/me` rejects tokens without a registered actor, so a
-  // failed retrieve means we still need to create the customer, then log in
-  // again to obtain a customer-bound token.
-  const customerExists = await sdk.store.customer
-    .retrieve({}, { authorization: `Bearer ${token}` })
-    .then(() => true)
-    .catch(() => false)
-
-  if (!customerExists) {
-    const pending = await getPendingCustomer()
-
-    try {
-      await sdk.store.customer.create(
-        {
-          email,
-          first_name: pending?.first_name,
-          last_name: pending?.last_name,
-          phone: pending?.phone,
-        },
-        {},
-        { authorization: `Bearer ${token}` }
-      )
-
-      token = (await sdk.auth.login("customer", "emailpass", {
-        email,
-        password,
-      })) as string
-    } catch (error) {
-      return { state: "error", error: String(error) }
-    }
-
-    await removePendingCustomer()
-  }
-
-  await setAuthToken(token)
-
-  const customerCacheTag = await getCacheTag("customers")
-  revalidateTag(customerCacheTag)
-
-  try {
-    await transferCart()
-  } catch (error) {
-    return { state: "error", error: String(error) }
-  }
-
+  // Phase 3: sdk.auth.login("customer", "supabase", { access_token }) + transferCart
   return { state: "success" }
 }
 
-// Confirms a customer's email using the token from the verification link.
-//
-// The confirm route doesn't require authentication, so this works even when the
-// customer opens the link on a different device than the one they signed up on.
+/**
+ * @deprecated Medusa verify-account path — replaced by Supabase confirm route (Phase 2 plan 02-02).
+ */
 export async function confirmEmailVerification(
-  token: string
+  _token: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    await sdk.auth.verification.confirm({ code: token })
-    return { success: true }
-  } catch (error) {
-    return { success: false, error: String(error) }
+  return {
+    success: false,
+    error:
+      "Email verification now uses the Supabase confirmation link. Check your inbox or request a new link.",
   }
 }
 
+/** Clears Supabase SSR session and any leftover Medusa JWT (AUTH-03). */
 export async function signout(countryCode: string) {
-  await sdk.auth.logout()
+  const supabase = await createClient()
+  await supabase.auth.signOut()
 
   await removeAuthToken()
 
