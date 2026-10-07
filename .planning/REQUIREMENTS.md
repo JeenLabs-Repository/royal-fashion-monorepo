@@ -29,8 +29,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin authentication
 
-- [ ] **ADMIN-01**: Operator can log into Medusa Admin with Supabase email/password (not Medusa-native password login)
-- [ ] **ADMIN-02**: After Supabase Admin login, a Medusa `user` actor session is established so Admin APIs/`/app` work
+- [x] **ADMIN-01**: Operator can log into Medusa Admin with Supabase email/password (not Medusa-native password login)
+- [x] **ADMIN-02**: After Supabase Admin login, a Medusa `user` actor session is established so Admin APIs/`/app` work
 - [ ] **ADMIN-03**: Admin bootstrap/invite-then-link runbook exists so first operators can be provisioned without chicken-and-egg
 
 ### Hard cutover
@@ -80,8 +80,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRIDGE-01 | Phase 3 | Complete |
 | BRIDGE-02 | Phase 3 | Complete |
 | BRIDGE-03 | Phase 3 | Complete |
-| ADMIN-01 | Phase 4 | Pending |
-| ADMIN-02 | Phase 4 | Pending |
+| ADMIN-01 | Phase 4 | Complete |
+| ADMIN-02 | Phase 4 | Complete |
 | ADMIN-03 | Phase 4 | Pending |
 | CUT-01 | Phase 5 | Pending |
 | CUT-02 | Phase 5 | Pending |
