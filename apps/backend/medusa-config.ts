@@ -14,7 +14,8 @@ module.exports = defineConfig({
       // Customer Store auth via Supabase bridge; keep emailpass for Admin user until Phase 4/5
       authMethodsPerActor: {
         customer: ["supabase"],
-        user: ["emailpass"],
+        // supabase for Admin happy path; emailpass kept until Phase 5 cutover
+        user: ["supabase", "emailpass"],
       },
     }
   },

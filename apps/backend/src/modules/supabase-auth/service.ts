@@ -170,9 +170,9 @@ class SupabaseAuthProviderService extends AbstractAuthModuleProvider {
       }
     }
 
-    // Identity is ready for Store JWT mint. Customer actor link
-    // (app_metadata.customer_id) is completed by exchange-supabase-customer
-    // workflow / ensureCustomer via storefront customer.create (Phase 3-02).
+    // Actor links:
+    // - customer_id via exchange-supabase-customer / storefront customer.create
+    // - user_id via exchange-supabase-admin (existing User only; never from user_metadata)
     return {
       success: true,
       authIdentity,

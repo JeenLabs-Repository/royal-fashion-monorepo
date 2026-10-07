@@ -181,6 +181,12 @@ Confirm and recovery links exchange codes at:
 
 Add that pattern (or `http://127.0.0.1:8000/**`) under `additional_redirect_urls` in `supabase/config.toml` (already included for local). Password reset: `/account/forgot-password` → email → confirm → `/account/reset-password`.
 
+### Admin Supabase login
+
+Operators sign in at **`/app/supabase-login`** (Supabase email/password → Medusa user session). Requires a pre-provisioned Medusa User row — see [docs/admin-supabase-bootstrap.md](docs/admin-supabase-bootstrap.md).
+
+Admin browser env (publishable only): `VITE_MEDUSA_ADMIN_SUPABASE_URL`, `VITE_MEDUSA_ADMIN_SUPABASE_PUBLISHABLE_KEY` in `apps/backend/.env`. Ensure `ADMIN_CORS` / `AUTH_CORS` include `http://localhost:9000` (and Vite admin origin if used).
+
 ## Configuration
 
 The storefront is configured via environment variables in `apps/storefront/.env.local`:
