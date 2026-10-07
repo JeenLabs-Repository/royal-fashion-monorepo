@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Customer authentication (Supabase)
 
-- [ ] **AUTH-01**: Shopper can create an account with email and password via Supabase Auth (not Medusa `emailpass`)
-- [ ] **AUTH-02**: Shopper can log in with email and password via Supabase Auth
-- [ ] **AUTH-03**: Shopper can log out and lose storefront authenticated access on that device
+- [x] **AUTH-01**: Shopper can create an account with email and password via Supabase Auth (not Medusa `emailpass`)
+- [x] **AUTH-02**: Shopper can log in with email and password via Supabase Auth
+- [x] **AUTH-03**: Shopper can log out and lose storefront authenticated access on that device
 - [ ] **AUTH-04**: Shopper receives / completes email verification via Supabase (confirm route + configured local/prod confirmation policy)
 - [ ] **AUTH-05**: Shopper can request a password reset email and set a new password via Supabase recovery flow
 
@@ -72,9 +72,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SESS-01 | Phase 1 | Pending |
 | SESS-02 | Phase 1 | Pending |
 | SESS-03 | Phase 1 | Pending |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
+| AUTH-02 | Phase 2 | Complete |
+| AUTH-03 | Phase 2 | Complete |
 | AUTH-04 | Phase 2 | Pending |
 | AUTH-05 | Phase 2 | Pending |
 | BRIDGE-01 | Phase 3 | Pending |
