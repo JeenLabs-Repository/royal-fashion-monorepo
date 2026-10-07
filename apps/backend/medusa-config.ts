@@ -11,11 +11,10 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET,
       cookieSecret: process.env.COOKIE_SECRET,
-      // Customer Store auth via Supabase bridge; keep emailpass for Admin user until Phase 4/5
+      // Hard cutover (CUT-01/02): Supabase-only Auth Module providers for both actors
       authMethodsPerActor: {
         customer: ["supabase"],
-        // supabase for Admin happy path; emailpass kept until Phase 5 cutover
-        user: ["supabase", "emailpass"],
+        user: ["supabase"],
       },
     }
   },
@@ -24,10 +23,6 @@ module.exports = defineConfig({
       resolve: "@medusajs/medusa/auth",
       options: {
         providers: [
-          {
-            resolve: "@medusajs/medusa/auth-emailpass",
-            id: "emailpass",
-          },
           {
             resolve: "./src/modules/supabase-auth",
             id: "supabase",

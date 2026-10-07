@@ -20,8 +20,9 @@ const Login = ({ setCurrentView }: Props) => {
     >
       <h1 className="text-large-semi uppercase mb-6">Welcome back</h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-8">
-        Sign in with your email and password. Shopping account data connects
-        after sign-in once the store bridge is available.
+        Sign in with your email and password. Previous Medusa store passwords no
+        longer work — re-register or use Forgot password to set a new Supabase
+        password. Shopping account data connects after sign-in.
       </p>
       {message?.state === "verification_required" && (
         <div

@@ -183,9 +183,13 @@ Add that pattern (or `http://127.0.0.1:8000/**`) under `additional_redirect_urls
 
 ### Admin Supabase login
 
-Operators sign in at **`/app/supabase-login`** (Supabase email/password → Medusa user session). Requires a pre-provisioned Medusa User row — see [docs/admin-supabase-bootstrap.md](docs/admin-supabase-bootstrap.md).
+Operators sign in at **`/app/supabase-login`** only (Supabase email/password → Medusa user session). Stock Admin password login is disabled. Requires a pre-provisioned Medusa User row — see [docs/admin-supabase-bootstrap.md](docs/admin-supabase-bootstrap.md).
 
 Admin browser env (publishable only): `VITE_MEDUSA_ADMIN_SUPABASE_URL`, `VITE_MEDUSA_ADMIN_SUPABASE_PUBLISHABLE_KEY` in `apps/backend/.env`. Ensure `ADMIN_CORS` / `AUTH_CORS` include `http://localhost:9000` (and Vite admin origin if used).
+
+### Hard cutover
+
+See [docs/auth-cutover.md](docs/auth-cutover.md) for re-register/reset messaging and optional `JWT_SECRET` rotation to invalidate old Medusa JWTs.
 
 ## Configuration
 

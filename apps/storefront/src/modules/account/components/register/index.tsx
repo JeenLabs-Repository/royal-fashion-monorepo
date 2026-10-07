@@ -24,8 +24,9 @@ const Register = ({ setCurrentView }: Props) => {
         Create your account
       </h1>
       <p className="text-center text-base-regular text-ui-fg-base mb-4">
-        Register with email and password. After you verify your email, you can
-        sign in — order history links after the store account is connected.
+        Create a new Supabase account (re-register if you only had a Medusa
+        password before). After you verify your email, you can sign in — order
+        history links after the store account is connected.
       </p>
       {message?.state === "verification_required" && (
         <div

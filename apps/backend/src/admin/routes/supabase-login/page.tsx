@@ -6,7 +6,7 @@ import { loginAdminWithSupabase } from "./page.logic"
 
 /**
  * Operator entry: Supabase email/password then Medusa user session.
- * Temporary URL: /app/supabase-login (stock /app/login remains until Phase 5).
+ * Primary Admin entry after hard cutover: /app/supabase-login
  */
 const SupabaseLoginPage = () => {
   const navigate = useNavigate()
