@@ -29,7 +29,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Operator can start local Supabase and reach Auth at `http://127.0.0.1:54321` using documented env vars for storefront and backend
   2. Authenticated shopper session survives refresh and navigation via `@supabase/ssr` cookies; auth decisions use `getUser()` (not `getSession` alone)
   3. Service-role / secret Supabase keys never appear in `NEXT_PUBLIC_*` or browser-visible bundles
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Local Supabase + SSR clients, env boundaries, middleware refresh (SESS-01..03)
 
 ### Phase 2: Storefront Supabase Identity
 **Goal:** Shoppers can create accounts, sign in/out, verify email, and reset passwords entirely through Supabase Auth
@@ -42,8 +45,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Shopper can log out and lose storefront authenticated access on that device
   4. Shopper can complete email verification via Supabase confirm flow under the configured local/prod confirmation policy
   5. Shopper can request a password reset email and set a new password via Supabase recovery
-**Plans:** TBD
+**Plans:** 2 plans
 **UI hint:** yes
+
+Plans:
+- [ ] 02-01-PLAN.md — Register/login/logout via Supabase Server Actions (AUTH-01..03)
+- [ ] 02-02-PLAN.md — Email confirm + password reset; retire Medusa verify UX (AUTH-04..05)
 
 ### Phase 3: Medusa Customer Bridge
 **Goal:** After Supabase auth, shoppers become Medusa customers with working Store API access and preserved guest carts
@@ -54,7 +61,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. After Supabase auth, the system finds or creates a Medusa Customer linked by email and/or Supabase user id
   2. Authenticated Store API calls succeed with a Medusa customer credential/session (not Supabase-only Store calls)
   3. Guest cart transfers to the authenticated customer after successful Medusa customer bind
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Custom `supabase` Auth provider + customer link workflow (BRIDGE-01..02)
+- [ ] 03-02-PLAN.md — Storefront token exchange + transferCart (BRIDGE-02..03)
 
 ### Phase 4: Admin Supabase Login
 **Goal:** Operators can enter Medusa Admin via Supabase email/password with a usable Medusa user actor session
@@ -65,8 +76,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Operator can log into Medusa Admin with Supabase email/password (not Medusa-native password login)
   2. After Supabase Admin login, Admin APIs and `/app` work under an established Medusa `user` actor session
   3. Operator can provision the first admins using a documented bootstrap/invite-then-link runbook (no chicken-and-egg lockout)
-**Plans:** TBD
+**Plans:** 2 plans
 **UI hint:** yes
+
+Plans:
+- [ ] 04-01-PLAN.md — Admin Supabase login UI + user actor session (ADMIN-01..02)
+- [ ] 04-02-PLAN.md — Bootstrap/invite-then-link runbook + helper script (ADMIN-03)
 
 ### Phase 5: Hard Cutover
 **Goal:** Medusa password auth is gone for customers and Admin; existing password users get clear re-register/reset guidance
@@ -77,7 +92,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. All Medusa customer `emailpass` register/login/verify/reset paths are removed from storefront and config (no silent fallback)
   2. Medusa Admin native password login is removed or unreachable after the Supabase Admin path ships
   3. Existing Medusa password users see re-register / Supabase reset messaging (no hash migration); old Medusa JWTs no longer grant auth entry
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 05-01-PLAN.md — Remove emailpass, Admin password entry, cutover messaging + JWT invalidate (CUT-01..03)
 
 ## Progress
 
@@ -86,11 +104,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Supabase Local + SSR Foundation | 0/TBD | Not started | - |
-| 2. Storefront Supabase Identity | 0/TBD | Not started | - |
-| 3. Medusa Customer Bridge | 0/TBD | Not started | - |
-| 4. Admin Supabase Login | 0/TBD | Not started | - |
-| 5. Hard Cutover | 0/TBD | Not started | - |
+| 1. Supabase Local + SSR Foundation | 0/1 | Planned | - |
+| 2. Storefront Supabase Identity | 0/2 | Planned | - |
+| 3. Medusa Customer Bridge | 0/2 | Planned | - |
+| 4. Admin Supabase Login | 0/2 | Planned | - |
+| 5. Hard Cutover | 0/1 | Planned | - |
 
 ## Coverage Map
 

@@ -1,10 +1,10 @@
 ---
 gsd_state_version: '1.0'
-status: planning
+status: ready_to_execute
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 8
   completed_plans: 0
   percent: 0
 ---
@@ -16,15 +16,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-08)
 
 **Core value:** A shopper or admin can sign up / log in with email and password via Supabase, and Medusa still recognizes them for store or admin work — with zero remaining Medusa password auth paths.
-**Current focus:** Phase 1: Supabase Local + SSR Foundation
+**Current focus:** Phase 1: Supabase Local + SSR Foundation — execute `01-01-PLAN.md`
 **Mode:** mvp
 
 ## Current Position
 
 Phase: 1 of 5 (Supabase Local + SSR Foundation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-10-08 — Roadmap created (5 phases, 17/17 requirements mapped)
+Plan: 0 of 1 in current phase
+Status: Ready to execute
+Last activity: 2026-10-08 — All 5 phases planned (8 plans); awaiting `/gsd-execute-phase 1`
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -51,12 +51,13 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
+Decisions are logged in PROJECT.md Key Decisions table and per-phase CONTEXT.md (D-01..D-26).
 Recent decisions affecting current work:
 
 - Milestone: Supabase Auth email/password only; remove Medusa native password auth (store + Admin)
-- Roadmap: 5 phases aligned to research dependency order 1–5; research Phase 6 (tests/kill-switch) deferred to v2
-- Mode: mvp — ship hard cutover without v2 auth-quality extras
+- Roadmap: 5 phases; research Phase 6 extras deferred to v2
+- Mode: mvp — hard cutover without v2 auth-quality extras
+- Planning: tracer-first plans; autonomous execution; no blocking reversibility gates
 
 ### Pending Todos
 
@@ -64,8 +65,8 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3: Medusa 2.21 custom Auth provider token-exchange shape needs planning spike
-- Phase 4: Admin dashboard login replacement vs custom Admin route — highest uncertainty
+- Phase 3: Validate Medusa 2.21 custom Auth provider `access_token` body against docs during execute
+- Phase 4: Admin dashboard login replacement vs custom route — planned as custom `supabase-login` route
 
 ## Deferred Items
 
@@ -78,5 +79,5 @@ Items acknowledged and deferred at milestone close, most recent first:
 ## Session Continuity
 
 Last session: 2026-10-08
-Stopped at: Roadmap + STATE written; awaiting roadmap approval / plan-phase
-Resume file: None
+Stopped at: All phase PLANs written; ready to execute Phase 1
+Resume file: `.planning/phases/01-supabase-local-ssr-foundation/01-01-PLAN.md`
