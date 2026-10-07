@@ -11,8 +11,11 @@ import {
   getCacheOptions,
   getCacheTag,
   getCartId,
+  getPendingCustomer,
   removeAuthToken,
   removeCartId,
+  removePendingCustomer,
+  setAuthToken,
   setPendingCustomer,
 } from "./cookies"
 
@@ -103,20 +106,22 @@ export async function signup(
     return { state: "error", error: authErrorMessage(error) }
   }
 
-  // Keep non-authz profile fields for Phase 3 customer create.
+  // Keep non-authz profile fields for Medusa customer create.
   await setPendingCustomer(customerForm)
 
   // When email confirmations are enabled, there is no session yet.
-  if (!data.session) {
+  if (!data.session?.access_token) {
     return { state: "verification_required", email: customerForm.email }
   }
 
-  return { state: "success" }
+  return bindMedusaCustomerSession(
+    customerForm.email,
+    data.session.access_token
+  )
 }
 
 /**
- * Shopper login via Supabase Auth (AUTH-02). Does not mint `_medusa_jwt`
- * (Phase 3 will exchange via custom `supabase` provider).
+ * Shopper login via Supabase Auth, then Medusa `supabase` provider exchange.
  */
 export async function login(
   _currentState: unknown,
@@ -133,7 +138,7 @@ async function completeLogin(
   password: string
 ): Promise<CustomerAuthState> {
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -142,7 +147,100 @@ async function completeLogin(
     return { state: "error", error: authErrorMessage(error) }
   }
 
-  // Phase 3: sdk.auth.login("customer", "supabase", { access_token }) + transferCart
+  const accessToken = data.session?.access_token
+  if (!accessToken) {
+    return {
+      state: "error",
+      error: "Supabase session missing access_token after login.",
+    }
+  }
+
+  return bindMedusaCustomerSession(email, accessToken)
+}
+
+/**
+ * Exchange Supabase access_token for Medusa Store JWT, ensure Customer actor,
+ * then transfer guest cart (D-13, D-14 / BRIDGE-02, BRIDGE-03).
+ */
+async function bindMedusaCustomerSession(
+  email: string,
+  accessToken: string
+): Promise<CustomerAuthState> {
+  let token: string
+  try {
+    const result = await sdk.auth.login("customer", "supabase", {
+      access_token: accessToken,
+    })
+
+    if (typeof result === "object" && result && "location" in result) {
+      return {
+        state: "error",
+        error: "This login method isn't supported by the storefront.",
+      }
+    }
+
+    if (typeof result !== "string") {
+      return {
+        state: "error",
+        error: "Authentication requires additional steps that aren't supported.",
+      }
+    }
+
+    token = result
+  } catch (error) {
+    return { state: "error", error: String(error) }
+  }
+
+  const customerExists = await sdk.store.customer
+    .retrieve({}, { authorization: `Bearer ${token}` })
+    .then(() => true)
+    .catch(() => false)
+
+  if (!customerExists) {
+    const pending = await getPendingCustomer()
+
+    try {
+      await sdk.store.customer.create(
+        {
+          email,
+          first_name: pending?.first_name,
+          last_name: pending?.last_name,
+          phone: pending?.phone,
+        },
+        {},
+        { authorization: `Bearer ${token}` }
+      )
+
+      const relogin = await sdk.auth.login("customer", "supabase", {
+        access_token: accessToken,
+      })
+
+      if (typeof relogin !== "string") {
+        return {
+          state: "error",
+          error: "Could not refresh Medusa token after customer create.",
+        }
+      }
+
+      token = relogin
+    } catch (error) {
+      return { state: "error", error: String(error) }
+    }
+
+    await removePendingCustomer()
+  }
+
+  await setAuthToken(token)
+
+  const customerCacheTag = await getCacheTag("customers")
+  revalidateTag(customerCacheTag)
+
+  try {
+    await transferCart()
+  } catch (error) {
+    return { state: "error", error: String(error) }
+  }
+
   return { state: "success" }
 }
 

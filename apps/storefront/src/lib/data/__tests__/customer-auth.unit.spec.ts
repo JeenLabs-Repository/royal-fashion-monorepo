@@ -9,6 +9,7 @@ const source = readFileSync(CUSTOMER_TS, "utf8")
 describe("storefront customer auth → Supabase (AUTH-01..03)", () => {
   it("login path uses signInWithPassword and not Medusa emailpass login", () => {
     assert.match(source, /signInWithPassword/)
+    assert.doesNotMatch(source, /emailpass/)
     assert.doesNotMatch(
       source,
       /sdk\.auth\.login\(\s*["']customer["']\s*,\s*["']emailpass["']/
@@ -23,5 +24,12 @@ describe("storefront customer auth → Supabase (AUTH-01..03)", () => {
   it("signout calls supabase signOut and clears Medusa JWT helper", () => {
     assert.match(source, /signOut\s*\(/)
     assert.match(source, /removeAuthToken/)
+  })
+
+  it("bridges Supabase access_token to Medusa supabase provider + transferCart", () => {
+    assert.match(source, /sdk\.auth\.login\(\s*["']customer["']\s*,\s*["']supabase["']/)
+    assert.match(source, /access_token/)
+    assert.match(source, /setAuthToken/)
+    assert.match(source, /transferCart\s*\(/)
   })
 })
