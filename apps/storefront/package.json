@@ -13,7 +13,8 @@
     "start": "next start -p 8000",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
-    "test:env-boundary": "node --test --import tsx src/lib/supabase/__tests__/env-boundary.unit.spec.ts"
+    "test:env-boundary": "node --test --import tsx src/lib/supabase/__tests__/env-boundary.unit.spec.ts",
+    "test:customer-auth": "node --test --import tsx src/lib/data/__tests__/customer-auth.unit.spec.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
