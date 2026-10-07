@@ -146,16 +146,89 @@ async function completeLogin(
   return { state: "success" }
 }
 
+export type PasswordResetState =
+  | { state: "error"; error: string }
+  | { state: "success"; message: string }
+  | null
+
 /**
- * @deprecated Medusa verify-account path — replaced by Supabase confirm route (Phase 2 plan 02-02).
+ * Request a Supabase password-reset email (AUTH-05).
+ * redirectTo must be listed in supabase/config.toml additional_redirect_urls.
  */
-export async function confirmEmailVerification(
-  _token: string
-): Promise<{ success: boolean; error?: string }> {
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+): Promise<PasswordResetState> {
+  const email = formData.get("email") as string
+  const countryCode =
+    (formData.get("country_code") as string) ||
+    process.env.NEXT_PUBLIC_DEFAULT_REGION ||
+    "dk"
+
+  const base =
+    process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") ||
+    "http://127.0.0.1:8000"
+  const redirectTo = `${base}/${countryCode}/auth/confirm?next=/${countryCode}/account/reset-password`
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  })
+
+  if (error) {
+    return { state: "error", error: authErrorMessage(error) }
+  }
+
   return {
-    success: false,
-    error:
-      "Email verification now uses the Supabase confirmation link. Check your inbox or request a new link.",
+    state: "success",
+    message:
+      "If an account exists for that email, we sent a reset link. Check your inbox (and Mailpit locally).",
+  }
+}
+
+/**
+ * Set a new password when a recovery session is present (AUTH-05).
+ */
+export async function updatePassword(
+  _currentState: unknown,
+  formData: FormData
+): Promise<PasswordResetState> {
+  const password = formData.get("password") as string
+  const confirm = formData.get("confirm_password") as string
+
+  if (!password || password.length < 6) {
+    return {
+      state: "error",
+      error: "Password must be at least 6 characters.",
+    }
+  }
+
+  if (password !== confirm) {
+    return { state: "error", error: "Passwords do not match." }
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return {
+      state: "error",
+      error:
+        "Your reset link is missing or expired. Request a new password reset email.",
+    }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    return { state: "error", error: authErrorMessage(error) }
+  }
+
+  return {
+    state: "success",
+    message: "Password updated. You can sign in with your new password.",
   }
 }
 

@@ -168,6 +168,19 @@ Wire keys into:
 
 Env-boundary check: `cd apps/storefront && pnpm test:env-boundary`
 
+### Email confirmation policy (AUTH-04 / D-09)
+
+| Environment | `enable_confirmations` (`supabase/config.toml` → `[auth.email]`) | Notes |
+|-------------|-------------------------------------------------------------------|--------|
+| Local (CLI) | `false` (pinned) | Fast signup; Mailpit still available for reset emails |
+| Production hosted | `true` (set in project dashboard / remote config) | Require email verify before sign-in; configure SMTP |
+
+Confirm and recovery links exchange codes at:
+
+`http://127.0.0.1:8000/{countryCode}/auth/confirm`
+
+Add that pattern (or `http://127.0.0.1:8000/**`) under `additional_redirect_urls` in `supabase/config.toml` (already included for local). Password reset: `/account/forgot-password` → email → confirm → `/account/reset-password`.
+
 ## Configuration
 
 The storefront is configured via environment variables in `apps/storefront/.env.local`:

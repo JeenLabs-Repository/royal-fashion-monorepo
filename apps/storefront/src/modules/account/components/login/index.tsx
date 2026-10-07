@@ -3,6 +3,7 @@ import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useActionState } from "react"
 
 type Props = {
@@ -59,6 +60,13 @@ const Login = ({ setCurrentView }: Props) => {
           Sign in
         </SubmitButton>
       </form>
+      <LocalizedClientLink
+        href="/account/forgot-password"
+        className="text-small-regular underline mt-4"
+        data-testid="forgot-password-link"
+      >
+        Forgot password?
+      </LocalizedClientLink>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
         Not a member?{" "}
         <button
