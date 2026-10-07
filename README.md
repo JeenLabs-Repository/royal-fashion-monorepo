@@ -140,6 +140,34 @@ You can slo run the following command from the root to start both backend and st
 pnpm dev
 ```
 
+## Local Supabase Auth (self-hosted)
+
+Auth credentials are moving to **Supabase Auth** (email/password). Local development uses the Supabase CLI + Docker — **separate** from Medusa’s `DATABASE_URL` commerce Postgres.
+
+**Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) running.
+
+```bash
+# From repo root
+pnpm supabase:start          # API http://127.0.0.1:54321 — requires Docker
+pnpm supabase:status         # Copy anon/publishable + service_role keys
+pnpm supabase:stop
+```
+
+| Service | Default URL |
+|---------|-------------|
+| Auth / API | `http://127.0.0.1:54321` |
+| Studio | `http://127.0.0.1:54323` |
+| Mailpit (local email) | `http://127.0.0.1:54324` |
+
+Wire keys into:
+
+- Storefront (public only): `apps/storefront/.env.local` from `.env.example` / `.env.template` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- Backend (server-only): `apps/backend/.env` — `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+
+**Never** put `service_role` / secret keys in any `NEXT_PUBLIC_*` variable.
+
+Env-boundary check: `cd apps/storefront && pnpm test:env-boundary`
+
 ## Configuration
 
 The storefront is configured via environment variables in `apps/storefront/.env.local`:
@@ -151,6 +179,8 @@ The storefront is configured via environment variables in `apps/storefront/.env.
 | `NEXT_PUBLIC_DEFAULT_REGION` | Default region country code | `dk` |
 | `NEXT_PUBLIC_BASE_URL` | Base URL of the storefront | `https://localhost:8000` |
 | `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) | — |
+| `NEXT_PUBLIC_SUPABASE_URL` | Self-hosted / project Supabase API URL | `http://127.0.0.1:54321` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (anon) key | — |
 
 ## Resources
 

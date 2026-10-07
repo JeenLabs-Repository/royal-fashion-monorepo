@@ -12,7 +12,7 @@ Replace all native Medusa password auth (storefront customer `emailpass` and Adm
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Supabase Local + SSR Foundation** - Local Auth host, env boundaries, durable SSR cookies
+- [x] **Phase 1: Supabase Local + SSR Foundation** - Local Auth host, env boundaries, durable SSR cookies
 - [ ] **Phase 2: Storefront Supabase Identity** - Register, login, logout, verify, and password reset via Supabase
 - [ ] **Phase 3: Medusa Customer Bridge** - Link Medusa customer, Store credential, guest cart transfer
 - [ ] **Phase 4: Admin Supabase Login** - Operator Supabase login with Medusa user actor session

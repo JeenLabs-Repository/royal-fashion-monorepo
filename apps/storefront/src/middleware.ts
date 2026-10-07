@@ -1,5 +1,9 @@
 import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
+import {
+  copySessionOntoResponse,
+  updateSession,
+} from "@lib/supabase/middleware"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -75,7 +79,9 @@ async function getCountryCode(
   const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
   // Cloudflare Workers provides country via request.cf.country
-  const cloudflareCountryCode = (request as { cf?: { country?: string } }).cf?.country?.toLowerCase()
+  const cloudflareCountryCode = (
+    request as { cf?: { country?: string } }
+  ).cf?.country?.toLowerCase()
 
   // Vercel provides x-vercel-ip-country header
   const vercelCountryCode = request.headers
@@ -98,12 +104,14 @@ async function getCountryCode(
 }
 
 /**
- * Middleware to handle region selection and onboarding status.
+ * Middleware: refresh Supabase SSR session, then handle region selection / onboarding.
  */
 export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.includes(".")) {
     return NextResponse.next()
   }
+
+  const supabaseResponse = await updateSession(request)
 
   const cacheIdCookie = request.cookies.get("_medusa_cache_id")
   const cacheId = cacheIdCookie?.value || crypto.randomUUID()
@@ -118,13 +126,13 @@ export async function middleware(request: NextRequest) {
 
   if (urlHasCountry) {
     if (!cacheIdCookie) {
-      const response = NextResponse.next()
+      const response = NextResponse.next({ request })
       response.cookies.set("_medusa_cache_id", cacheId, {
         maxAge: 60 * 60 * 24,
       })
-      return response
+      return copySessionOntoResponse(supabaseResponse, response)
     }
-    return NextResponse.next()
+    return supabaseResponse
   }
 
   // if the url doesn't have the country, redirect to it
@@ -133,7 +141,8 @@ export async function middleware(request: NextRequest) {
   const queryString = request.nextUrl.search || ""
   const redirectUrl = `${request.nextUrl.origin}/${country}${redirectPath}${queryString}`
 
-  return NextResponse.redirect(redirectUrl, 307)
+  const redirect = NextResponse.redirect(redirectUrl, 307)
+  return copySessionOntoResponse(supabaseResponse, redirect)
 }
 
 export const config = {
