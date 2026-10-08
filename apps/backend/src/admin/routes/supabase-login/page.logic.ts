@@ -32,9 +32,17 @@ export async function loginAdminWithSupabase(
 
     return { ok: true }
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    if (message.includes("Missing VITE_MEDUSA_ADMIN_SUPABASE")) {
+      return {
+        ok: false,
+        error:
+          "Admin Supabase env missing. Set VITE_MEDUSA_ADMIN_SUPABASE_URL and VITE_MEDUSA_ADMIN_SUPABASE_PUBLISHABLE_KEY in apps/backend/.env, then restart the backend.",
+      }
+    }
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: message,
     }
   }
 }
