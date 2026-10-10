@@ -2,6 +2,14 @@
   "mcpServers": {
     "mercur": {
       "url": "https://docs.mercurjs.com/mcp"
+    },
+    "graft": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@nanonets/graft",
+        "mcp"
+      ]
     }
   }
 }
