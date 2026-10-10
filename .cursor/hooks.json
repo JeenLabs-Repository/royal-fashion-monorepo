@@ -18,18 +18,6 @@
         "command": "node \"D:\\RoyalFasion\\royal-fashion-wear-monorepo\\.cursor\\hooks\\graft-hooks.cjs\" cursor-post-tool"
       }
     ],
-    "preToolUse": [
-      {
-        "type": "command",
-        "command": "\"$(for n in \"C:/Program Files/nodejs/node.exe\" \"$(command -v node)\" /usr/local/bin/node /usr/bin/node; do [ -x \"$n\" ] && { [ \"${n#/}\" != \"$n\" ] || [ \"${n#?:}\" != \"$n\" ]; } && printf '%s' \"$n\" && break; done)\" \"D:/RoyalFasion/royal-fashion-wear-monorepo/.cursor/hooks/gsd-cursor-pre-tool.js\"",
-        "gsd-managed": true
-      },
-      {
-        "command": "python3 \".gsd-path/guard_hook.py\"",
-        "matcher": ".*",
-        "failClosed": true
-      }
-    ],
     "stop": [
       {
         "type": "command",
